@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gamma AI 簡報入門講義 — 高中生版</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap');
+
+  :root {
+    --bg: #0d0d14;
+    --surface: #16161f;
+    --card: #1e1e2d;
+    --accent1: #7c5cfc;
+    --accent2: #fc5c7d;
+    --accent3: #5cf8d0;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+    --border: #2a2a3d;
+    --tag-bg: #2a1f4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 80px 40px 60px;
+    background: linear-gradient(135deg, #0d0d14 0%, #1a0a2e 50%, #0d1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -10%;
+    width: 50%;
+    height: 200%;
+    background: radial-gradient(ellipse, rgba(124,92,252,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: 0%;
+    width: 40%;
+    height: 160%;
+    background: radial-gradient(ellipse, rgba(252,92,125,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .label-tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent3);
+    background: rgba(92,248,208,0.08);
+    border: 1px solid rgba(92,248,208,0.25);
+    border-radius: 20px;
+    padding: 5px 16px;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 8vw, 84px);
+    letter-spacing: 3px;
+    line-height: 1.05;
+    background: linear-gradient(135deg, #fff 0%, #c4b0ff 40%, #fc5c7d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  .hero-sub {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 520px;
+    margin: 0 auto 32px;
+  }
+
+  .hero-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  .badge-purple { background: rgba(124,92,252,0.2); color: #c4b0ff; border: 1px solid rgba(124,92,252,0.3); }
+  .badge-pink { background: rgba(252,92,125,0.15); color: #fc9ab0; border: 1px solid rgba(252,92,125,0.3); }
+  .badge-teal { background: rgba(92,248,208,0.12); color: #5cf8d0; border: 1px solid rgba(92,248,208,0.3); }
+
+  /* Content wrapper */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* Section headings */
+  .section {
+    margin-top: 60px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent1);
+    background: rgba(124,92,252,0.12);
+    border: 1px solid rgba(124,92,252,0.25);
+    border-radius: 6px;
+    padding: 3px 10px;
+    white-space: nowrap;
+  }
+
+  .section-title {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 30px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .card-purple::before { background: linear-gradient(90deg, var(--accent1), transparent); }
+  .card-pink::before   { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .card-teal::before   { background: linear-gradient(90deg, var(--accent3), transparent); }
+  .card-yellow::before { background: linear-gradient(90deg, #f7c948, transparent); }
+
+  .card-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  p { color: #cccce0; font-size: 15px; line-height: 1.9; }
+
+  /* Grid */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  /* Highlight box */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(124,92,252,0.1), rgba(252,92,125,0.06));
+    border: 1px solid rgba(124,92,252,0.25);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+  }
+
+  .highlight-box .hl-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent1);
+    margin-bottom: 10px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Step flow */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent1), var(--accent2));
+    border-radius: 2px;
+  }
+
+  .step {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    padding: 20px 0;
+    position: relative;
+  }
+
+  .step-dot {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 50%;
+    background: var(--accent1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    margin-left: -12px;
+    z-index: 1;
+    box-shadow: 0 0 0 3px var(--bg);
+  }
+
+  .step:nth-child(even) .step-dot { background: var(--accent2); }
+  .step:nth-child(3) .step-dot { background: var(--accent3); color: #111; }
+
+  .step-body .step-label {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .step-body p {
+    font-size: 14px;
+  }
+
+  /* Code-style tip */
+  .code-tip {
+    font-family: 'Space Mono', monospace;
+    background: #111118;
+    border: 1px solid #2a2a3d;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--accent3);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  .code-tip .comment { color: #555577; }
+
+  /* Credit table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    background: rgba(124,92,252,0.12);
+    color: var(--accent1);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 14px;
+    color: #cccce0;
+    border-bottom: 1px solid rgba(42,42,61,0.5);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td .credit-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .c-high { background: rgba(252,92,125,0.15); color: #fc9ab0; }
+  .c-med  { background: rgba(124,92,252,0.15); color: #c4b0ff; }
+  .c-low  { background: rgba(92,248,208,0.12); color: #5cf8d0; }
+
+  /* Practice box */
+  .practice-box {
+    background: var(--card);
+    border: 2px dashed rgba(124,92,252,0.35);
+    border-radius: 14px;
+    padding: 28px 30px;
+    margin-bottom: 16px;
+  }
+
+  .practice-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .practice-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: rgba(252,92,125,0.15);
+    color: #fc9ab0;
+    border: 1px solid rgba(252,92,125,0.3);
+    border-radius: 4px;
+    padding: 3px 8px;
+  }
+
+  .practice-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .task-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .task-list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: #cccce0;
+  }
+
+  .task-check {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 1px;
+    font-size: 13px;
+    color: transparent;
+  }
+
+  .task-check:hover {
+    border-color: var(--accent1);
+  }
+
+  .task-check.done {
+    background: var(--accent1);
+    border-color: var(--accent1);
+    color: #fff;
+  }
+
+  /* Prompt examples */
+  .prompt-card {
+    background: #111118;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+
+  .prompt-card:hover {
+    border-color: var(--accent1);
+  }
+
+  .prompt-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 6px;
+  }
+
+  .prompt-text {
+    font-size: 14px;
+    color: var(--accent3);
+    font-family: 'Space Mono', monospace;
+    line-height: 1.6;
+  }
+
+  /* Tip banner */
+  .tip {
+    display: flex;
+    gap: 14px;
+    background: rgba(92,248,208,0.05);
+    border: 1px solid rgba(92,248,208,0.2);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-top: 14px;
+    align-items: flex-start;
+  }
+
+  .tip-icon { font-size: 18px; flex-shrink: 0; }
+  .tip-text { font-size: 14px; color: #aaeedd; line-height: 1.7; }
+
+  /* Warning */
+  .warning {
+    display: flex;
+    gap: 14px;
+    background: rgba(252,200,92,0.05);
+    border: 1px solid rgba(252,200,92,0.2);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-top: 14px;
+    align-items: flex-start;
+  }
+
+  .warning-text { font-size: 14px; color: #f7e8aa; line-height: 1.7; }
+
+  /* Future section */
+  .future-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 600px) {
+    .future-grid { grid-template-columns: 1fr; }
+  }
+
+  .future-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .future-icon { font-size: 28px; margin-bottom: 10px; }
+  .future-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .future-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 40px 30px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 60px;
+  }
+
+  .footer a {
+    color: var(--accent1);
+    text-decoration: none;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  strong { color: var(--text); }
+
+  ul.normal-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  ul.normal-list li {
+    font-size: 14px;
+    color: #cccce0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  ul.normal-list li::before {
+    content: '›';
+    color: var(--accent1);
+    font-size: 16px;
+    line-height: 1.6;
+    flex-shrink: 0;
+  }
+
+  .big-quote {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .big-quote span { color: var(--accent1); }
+
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="label-tag">高中生 AI 工具入門講義 · 2025</div>
+  <h1>GAMMA AI<br>簡報創作入門</h1>
+  <p class="hero-sub">從零開始，用 AI 在幾分鐘內做出讓人驚艷的簡報 — 不需要設計技能，不需要學 PowerPoint。</p>
+  <div class="hero-badges">
+    <span class="badge badge-purple">🆓 免費開始</span>
+    <span class="badge badge-pink">⚡ 適合初學者</span>
+    <span class="badge badge-teal">🎓 未來可進階</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- SECTION 0: 為什麼要學 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">00 / 為什麼</span>
+      <span class="section-title">你為什麼需要認識 Gamma？</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="highlight-box">
+      <div class="hl-title">想像一下這個場景</div>
+      <p class="big-quote">
+        期末報告下週就要交，你需要做一份<span>介紹氣候變遷</span>的簡報。<br>
+        用 PowerPoint：你要花 3–5 小時找圖、排版、調顏色……<br>
+        用 Gamma AI：你只需要<span>輸入一行說明</span>，幾分鐘後簡報自動完成。
+      </p>
+      <p style="color: var(--muted); font-size: 14px;">這不是科幻小說，這是現在就能用的工具。</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card card-purple">
+        <div class="card-title"><span class="icon">😩</span> 以前做簡報</div>
+        <ul class="normal-list">
+          <li>從空白頁開始，不知道怎麼排版</li>
+          <li>花很多時間找圖片、調字體</li>
+          <li>每張投影片風格不一致</li>
+          <li>做到最後沒時間準備內容</li>
+        </ul>
+      </div>
+      <div class="card card-teal">
+        <div class="card-title"><span class="icon">🚀</span> 用 Gamma 做簡報</div>
+        <ul class="normal-list">
+          <li>輸入主題，AI 自動生成大綱和內容</li>
+          <li>自動配色、選圖、排版</li>
+          <li>整份簡報風格完全一致</li>
+          <li>只需要專注在「說什麼」，而不是「怎麼排」</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Gamma 是什麼 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01 / 認識工具</span>
+      <span class="section-title">Gamma 到底是什麼？</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="card card-purple">
+      <div class="card-title"><span class="icon">🤖</span> Gamma 的核心定義</div>
+      <p>Gamma 是一個 <strong>AI 驅動的內容創作平台</strong>，可以幫你製作：</p>
+      <div style="margin-top: 14px;" class="grid-2">
+        <div style="background: rgba(124,92,252,0.08); border-radius: 8px; padding: 14px;">
+          <div style="font-size: 24px; margin-bottom: 6px;">📊</div>
+          <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">簡報 / Slides</div>
+          <div style="font-size: 12px; color: var(--muted);">像 PowerPoint，但更美、更快</div>
+        </div>
+        <div style="background: rgba(252,92,125,0.08); border-radius: 8px; padding: 14px;">
+          <div style="font-size: 24px; margin-bottom: 6px;">🌐</div>
+          <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">網站</div>
+          <div style="font-size: 12px; color: var(--muted);">不需要寫程式碼</div>
+        </div>
+        <div style="background: rgba(92,248,208,0.08); border-radius: 8px; padding: 14px;">
+          <div style="font-size: 24px; margin-bottom: 6px;">📄</div>
+          <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">文件 / 報告</div>
+          <div style="font-size: 12px; color: var(--muted);">有視覺設計感的文件</div>
+        </div>
+        <div style="background: rgba(247,201,72,0.08); border-radius: 8px; padding: 14px;">
+          <div style="font-size: 24px; margin-bottom: 6px;">📱</div>
+          <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">社群媒體素材</div>
+          <div style="font-size: 12px; color: var(--muted);">IG、LinkedIn 貼文圖</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <span class="tip-text"><strong>重要概念：「卡片（Card）」</strong> — 在 Gamma 裡，每一張投影片叫做「Card（卡片）」。製作一份 8 頁的簡報 = 建立 8 張卡片。</span>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <div class="card card-yellow">
+        <div class="card-title"><span class="icon">🌍</span> Gamma 多受歡迎？</div>
+        <p>全球超過 <strong>5,000 萬用戶</strong>使用 Gamma，包含來自 Amazon、Zoom、Los Angeles Times 等知名企業的員工。使用 Gamma 已成為職場和學校的新趨勢，現在學會就是搶先一步！</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: 建立帳號 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02 / 開始使用</span>
+      <span class="section-title">建立帳號（5 分鐘完成）</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-dot">1</div>
+        <div class="step-body">
+          <div class="step-label">前往官網</div>
+          <p>打開瀏覽器，前往 <strong>gamma.app</strong>，點擊右上角的「<strong>Start for free</strong>（免費開始）」</p>
+          <div class="code-tip"><span class="comment">// 網址</span><br>https://gamma.app</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">2</div>
+        <div class="step-body">
+          <div class="step-label">用 Google 帳號登入</div>
+          <p>點「<strong>Continue with Google</strong>」，選擇你的 Gmail 帳號即可完成。<strong>不需要信用卡！</strong></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">3</div>
+        <div class="step-body">
+          <div class="step-label">回答幾個問題</div>
+          <p>Gamma 會問你使用目的：選 <strong>Education（教育）</strong>或 <strong>Personal use（個人使用）</strong>都可以。然後會問你是誰，你可以選 <strong>Student（學生）</strong>。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-dot">4</div>
+        <div class="step-body">
+          <div class="step-label">進入儀表板！</div>
+          <p>完成！你現在有 <strong>400 點免費積分</strong>可以使用。恭喜你正式進入 Gamma 的世界 🎉</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="warning">
+      <span class="tip-icon">⚠️</span>
+      <span class="warning-text"><strong>建議用學校信箱或個人 Gmail</strong> 登入，之後方便管理作業相關的簡報。</span>
+    </div>
+  </div>
+
+  <!-- SECTION 3: 積分說明 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03 / 了解積分</span>
+      <span class="section-title">積分是什麼？怎麼用？</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="card card-pink">
+      <div class="card-title"><span class="icon">💳</span> 積分（Credits）= Gamma 的 AI 使用額度</div>
+      <p>每次你叫 AI 幫你做事，就會消耗積分。<strong>免費帳號一開始有 400 點</strong>，而且可以透過推薦朋友來賺更多！</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>動作</th>
+          <th>消耗積分</th>
+          <th>說明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🪄 AI 生成整份簡報</td>
+          <td><span class="credit-badge c-high">40 點</span></td>
+          <td>最強的功能，從一句話生成完整簡報</td>
+        </tr>
+        <tr>
+          <td>💬 AI 修改文字 / 建議</td>
+          <td><span class="credit-badge c-med">10 點</span></td>
+          <td>叫 AI 改寫、翻譯、改善語氣</td>
+        </tr>
+        <tr>
+          <td>🖼️ AI 生成圖片</td>
+          <td><span class="credit-badge c-med">10 點</span></td>
+          <td>每次生成一張 AI 圖片</td>
+        </tr>
+        <tr>
+          <td>➕ AI 新增一張卡片</td>
+          <td><span class="credit-badge c-low">5 點</span></td>
+          <td>在現有簡報中用 AI 加一頁</td>
+        </tr>
+        <tr>
+          <td>⬇️ 延伸現有內容</td>
+          <td><span class="credit-badge c-low">2 點</span></td>
+          <td>讓 AI 繼續往下延伸</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <span class="tip-text"><strong>省分小技巧：</strong>先自己寫好大綱，再貼進 Gamma 生成，比直接讓 AI 從頭做更省積分，而且結果更符合你的想法！</span>
+    </div>
+  </div>
+
+  <!-- SECTION 4: 核心流程 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04 / 核心技巧</span>
+      <span class="section-title">製作第一份簡報：三步驟流程</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="highlight-box">
+      <div class="hl-title">Gamma 的黃金流程</div>
+      <div style="display: flex; gap: 0; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="text-align:center; flex:1; min-width:100px;">
+          <div style="font-size:32px; margin-bottom:6px;">✍️</div>
+          <div style="font-size:13px; font-weight:700; color: var(--accent1);">GENERATE</div>
+          <div style="font-size:12px; color: var(--muted); margin-top:2px;">輸入想法，AI 生成</div>
+        </div>
+        <div style="font-size:20px; color: var(--border);">›</div>
+        <div style="text-align:center; flex:1; min-width:100px;">
+          <div style="font-size:32px; margin-bottom:6px;">✂️</div>
+          <div style="font-size:13px; font-weight:700; color: var(--accent2);">SHAPE</div>
+          <div style="font-size:12px; color: var(--muted); margin-top:2px;">編輯、調整、美化</div>
+        </div>
+        <div style="font-size:20px; color: var(--border);">›</div>
+        <div style="text-align:center; flex:1; min-width:100px;">
+          <div style="font-size:32px; margin-bottom:6px;">🔗</div>
+          <div style="font-size:13px; font-weight:700; color: var(--accent3);">SHARE</div>
+          <div style="font-size:12px; color: var(--muted); margin-top:2px;">分享連結或匯出</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="card-title" style="font-size: 18px; margin-bottom: 16px; margin-top: 8px;"><span class="icon">✍️</span> 步驟一：Generate（生成）</div>
+
+    <div class="card card-purple">
+      <div class="card-title"><span class="icon">📍</span> 點擊「Create New」→「Generate」</div>
+      <p>在左側選單點擊 <strong>Create New（新增）</strong>，然後選擇 <strong>Generate（AI 生成）</strong>，接著決定：</p>
+      <ul class="normal-list" style="margin-top: 12px;">
+        <li><strong>要做什麼？</strong> 簡報 / 網頁 / 文件</li>
+        <li><strong>要幾張卡片？</strong> 建議初學者先選 6–8 張</li>
+        <li><strong>主題是什麼？</strong> 用一兩句話清楚描述（Prompt）</li>
+      </ul>
+    </div>
+
+    <div class="card-title" style="font-size: 15px; margin: 16px 0 10px;">🎯 Prompt（提示詞）寫法示範</div>
+    <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">點擊任一範例，可以複製使用（實際操作時請貼入 Gamma 的提示欄）：</p>
+
+    <div class="prompt-card" onclick="copyPrompt(this)">
+      <div class="prompt-label">🏫 學校作業範例</div>
+      <div class="prompt-text">Introduction to climate change: causes, effects, and solutions for high school students</div>
+    </div>
+    <div class="prompt-card" onclick="copyPrompt(this)">
+      <div class="prompt-label">🇹🇼 中文主題範例</div>
+      <div class="prompt-text">台灣的永續發展：環境挑戰與年輕人的行動，適合高中生簡報</div>
+    </div>
+    <div class="prompt-card" onclick="copyPrompt(this)">
+      <div class="prompt-label">💼 個人作品集範例</div>
+      <div class="prompt-text">My personal portfolio: skills, projects, and goals as a high school student interested in technology</div>
+    </div>
+    <div class="prompt-card" onclick="copyPrompt(this)">
+      <div class="prompt-label">🎮 有趣主題範例</div>
+      <div class="prompt-text">The history and impact of video games: from Atari to AI-powered gaming</div>
+    </div>
+
+    <div id="copy-hint" style="display:none; color: var(--accent3); font-size: 13px; margin-top: 8px; font-family: 'Space Mono', monospace;">✓ 已複製到剪貼簿！</div>
+
+    <hr class="divider">
+
+    <div class="card-title" style="font-size: 18px; margin-bottom: 16px;"><span class="icon">✂️</span> 步驟二：Shape（編輯）</div>
+
+    <div class="grid-2">
+      <div class="card card-teal">
+        <div class="card-title" style="font-size: 14px;"><span class="icon">🔤</span> 編輯文字</div>
+        <p style="font-size: 13px;">直接點擊任何文字就可以修改，就像在 Word 裡一樣簡單。</p>
+      </div>
+      <div class="card card-purple">
+        <div class="card-title" style="font-size: 14px;"><span class="icon">🖼️</span> 換圖片</div>
+        <p style="font-size: 13px;">點擊圖片 → 選「Replace」可以換成你自己的圖或讓 AI 重新生成。</p>
+      </div>
+      <div class="card card-pink">
+        <div class="card-title" style="font-size: 14px;"><span class="icon">🎨</span> 換主題</div>
+        <p style="font-size: 13px;">右上角有「Theme」按鈕，一鍵更換整份簡報的配色風格。</p>
+      </div>
+      <div class="card card-yellow">
+        <div class="card-title" style="font-size: 14px;"><span class="icon">🤖</span> 叫 AI 幫你改</div>
+        <p style="font-size: 13px;">點任一卡片右上角的 AI 按鈕，可以叫 AI 改寫、改排版、加圖片。</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">🎯</span>
+      <span class="tip-text"><strong>AI 編輯技巧：</strong>選取一段文字後按 AI 按鈕，你可以說「讓這段話更簡潔」、「把這段翻譯成英文」、「幫我加一個例子」—— AI 會直接幫你改！</span>
+    </div>
+
+    <hr class="divider">
+
+    <div class="card-title" style="font-size: 18px; margin-bottom: 16px;"><span class="icon">🔗</span> 步驟三：Share（分享）</div>
+
+    <div class="card card-teal">
+      <div class="card-title"><span class="icon">📤</span> 分享你的簡報</div>
+      <p>完成後有幾種方式可以分享：</p>
+      <ul class="normal-list" style="margin-top: 12px;">
+        <li><strong>分享連結</strong> — 產生一個連結，對方點開就能看，最方便！</li>
+        <li><strong>匯出 PowerPoint</strong> — 可以下載成 .pptx 格式，在 PowerPoint 繼續編輯</li>
+        <li><strong>匯出 PDF</strong> — 適合列印或傳給老師</li>
+        <li><strong>匯出 PNG 圖片</strong> — 每一頁都變成圖片</li>
+        <li><strong>匯出 Google Slides</strong> — 在 Google 雲端上繼續編輯</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 5: 實作練習 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05 / 動手做</span>
+      <span class="section-title">今日實作練習</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="practice-box">
+      <div class="practice-header">
+        <span class="practice-badge">練習 A · 必做</span>
+        <span class="practice-title">我的第一份 AI 簡報</span>
+      </div>
+      <p style="font-size: 14px; margin-bottom: 16px; color: var(--muted);">完成以下步驟，勾選每個項目：</p>
+      <ul class="task-list">
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>前往 gamma.app，用 Google 帳號完成註冊</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>點擊「Create New」→「Generate」，選擇「Presentation（簡報）」</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>輸入主題（例如：你喜歡的運動、城市、或任何你有興趣的事），按「Generate Outline」</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>看看 AI 生成的大綱，試著移動卡片順序或刪掉一張，再按「Generate」讓 AI 生成完整簡報</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>在完成的簡報中，手動修改一個標題和一段內容</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>嘗試更換一個不同的「Theme（主題）」，看看整份簡報有什麼變化</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>產生一個分享連結，傳給旁邊的同學看看！</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="practice-box" style="margin-top: 0;">
+      <div class="practice-header">
+        <span class="practice-badge" style="background: rgba(92,248,208,0.1); color: #5cf8d0; border-color: rgba(92,248,208,0.3);">練習 B · 挑戰</span>
+        <span class="practice-title">試用「模板」功能</span>
+      </div>
+      <p style="font-size: 14px; margin-bottom: 16px; color: var(--muted);">進階一點的操作，試試看！</p>
+      <ul class="task-list">
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>在左側選單找到「Templates（模板）」，瀏覽裡面的設計</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>選一個你喜歡的模板，點「Preview」先預覽，再試試不同 Theme 的效果</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>點「Use this template」，把模板的內容改成你自己的資料</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>嘗試用「Present mode（簡報模式）」播放你的簡報</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="practice-box" style="margin-top: 0;">
+      <div class="practice-header">
+        <span class="practice-badge" style="background: rgba(247,201,72,0.1); color: #f7c948; border-color: rgba(247,201,72,0.3);">練習 C · 創意挑戰</span>
+        <span class="practice-title">做一個「自我介紹」簡報</span>
+      </div>
+      <p style="font-size: 14px; margin-bottom: 16px; color: var(--muted);">最後的挑戰！做一份真正屬於你的簡報：</p>
+      <ul class="task-list">
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>Prompt：「My personal introduction: who I am, my interests, my goals, and what makes me unique」</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>讓 AI 生成後，把所有的名字、興趣、目標替換成你自己的真實資訊</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>選一個你覺得最帥的主題配色</span>
+        </li>
+        <li>
+          <div class="task-check" onclick="toggleCheck(this)">✓</div>
+          <span>分享連結給全班同學，互相欣賞！</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 6: 常見問題 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06 / 常見問題</span>
+      <span class="section-title">新手最常問的問題</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="card card-purple">
+      <div class="card-title"><span class="icon">❓</span> 要付費嗎？</div>
+      <p>免費版完全夠用入門！你有 400 點積分，可以生成約 <strong>10 份完整簡報</strong>。透過推薦朋友還可以再得 200 點。付費版從 $8 美金/月起，有更多進階功能，但現在不需要考慮。</p>
+    </div>
+
+    <div class="card card-pink">
+      <div class="card-title"><span class="icon">❓</span> 可以用中文嗎？</div>
+      <p>可以！你可以直接用中文輸入主題描述，Gamma 就會生成中文內容。也可以在語言設定中選擇繁體中文。不過有些主題用英文描述，AI 生成效果可能更好。</p>
+    </div>
+
+    <div class="card card-teal">
+      <div class="card-title"><span class="icon">❓</span> 老師會知道這是 AI 做的嗎？</div>
+      <p>免費版的簡報下方會有「Made with Gamma」的標記。建議你在使用 AI 生成後，<strong>認真修改和補充內容</strong>，讓它真正反映你的理解，這才是正確使用 AI 工具的態度。</p>
+    </div>
+
+    <div class="card card-yellow">
+      <div class="card-title"><span class="icon">❓</span> 可以下載到電腦嗎？</div>
+      <p>可以！點擊右上角的三個點選單 → Export，可以匯出成 <strong>PDF、PowerPoint、Google Slides 或 PNG 圖片</strong>。注意：某些特效（如漸層文字）在匯出到 PowerPoint 後可能會改變，建議直接分享連結最能保留完整效果。</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: 未來可以學什麼 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07 / 未來展望</span>
+      <span class="section-title">升大學後可以深入學習的方向</span>
+      <span class="section-line"></span>
+    </div>
+
+    <p style="margin-bottom: 20px;">今天你只是學到了 Gamma 的基礎。以下是進入大學或職場後，可以繼續探索的進階方向：</p>
+
+    <div class="future-grid">
+      <div class="future-item">
+        <div class="future-icon">🌐</div>
+        <div class="future-title">建立個人作品集網站</div>
+        <div class="future-desc">用 Gamma 做出有設計感的個人網站，展示你的大學專題和作品，完全不需要寫程式。</div>
+      </div>
+      <div class="future-item">
+        <div class="future-icon">🎨</div>
+        <div class="future-title">品牌設計與一致性</div>
+        <div class="future-desc">學習在 Pro 版中設定自訂品牌顏色和字體，讓所有簡報都有統一的個人風格。</div>
+      </div>
+      <div class="future-item">
+        <div class="future-icon">👥</div>
+        <div class="future-title">團隊協作</div>
+        <div class="future-desc">邀請組員一起在同一份簡報上即時協作編輯，非常適合大學分組報告！</div>
+      </div>
+      <div class="future-item">
+        <div class="future-icon">📊</div>
+        <div class="future-title">分析與數據追蹤</div>
+        <div class="future-desc">Pro 版可以追蹤誰看了你的簡報、看了多久，適合求職、業務或社團招募時使用。</div>
+      </div>
+      <div class="future-item">
+        <div class="future-icon">🤖</div>
+        <div class="future-title">API 整合自動化</div>
+        <div class="future-desc">進階用法：用程式碼自動生成大量簡報，適合資工系學生或想學行銷自動化的人。</div>
+      </div>
+      <div class="future-item">
+        <div class="future-icon">📱</div>
+        <div class="future-title">社群媒體內容創作</div>
+        <div class="future-desc">用 Gamma 批量製作 IG 貼文圖、LinkedIn 文章卡片，建立個人 / 社團的品牌形象。</div>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top: 20px;">
+      <div class="hl-title">🚀 你今天學到的，是未來職場的核心技能</div>
+      <p>AI 工具能力正在成為大學、求職的重要加分項。懂得善用 AI 加速工作，而不是被 AI 取代 — 這就是未來人才的差異所在。你今天的第一步，就是這條路的開始。</p>
+    </div>
+  </div>
+
+  <!-- 快速參考卡 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">快速參考</span>
+      <span class="section-title">操作速查卡</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="card" style="background: #111118;">
+      <table>
+        <thead>
+          <tr><th>我想做的事</th><th>怎麼操作</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>新增一份簡報</td><td>Create New → Generate → Presentation</td></tr>
+          <tr><td>改文字</td><td>直接點擊文字，開始打字</td></tr>
+          <tr><td>換主題顏色</td><td>右側面板 → Theme（主題）</td></tr>
+          <tr><td>叫 AI 幫我改這頁</td><td>點卡片 → 閃電 ⚡ 按鈕 → 輸入指令</td></tr>
+          <tr><td>新增一頁</td><td>卡片之間的「＋」按鈕</td></tr>
+          <tr><td>刪除一頁</td><td>點三個點 ⋯ → Delete card</td></tr>
+          <tr><td>換圖片</td><td>點圖片 → Replace → 選來源</td></tr>
+          <tr><td>播放簡報</td><td>右上角 → Present（簡報模式）</td></tr>
+          <tr><td>下載 PDF</td><td>三個點 ⋯ → Export → PDF</td></tr>
+          <tr><td>分享連結</td><td>右上角 Share → Copy link</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p>Gamma AI 入門講義 · 高中生版 · 2025</p>
+  <p style="margin-top: 8px;">官方網站：<a href="https://gamma.app" target="_blank">gamma.app</a> &nbsp;|&nbsp; 完全免費開始使用</p>
+</div>
+
+<script>
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+  }
+
+  function copyPrompt(card) {
+    const text = card.querySelector('.prompt-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const hint = document.getElementById('copy-hint');
+      hint.style.display = 'block';
+      setTimeout(() => { hint.style.display = 'none'; }, 2000);
+    }).catch(() => {
+      // fallback: select text
+    });
+  }
+</script>
+
+</body>
+</html>
