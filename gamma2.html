@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gamma 簡報教案 — AI 大綱生成器</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #F7F6F2;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE6;
+  --border: #DDD9D0;
+  --border2: #C8C4BB;
+  --ink: #1C1A17;
+  --ink2: #5A5650;
+  --ink3: #928D87;
+  --accent: #D4521A;
+  --accent-bg: #FAF0EA;
+  --accent-border: #F0C4A8;
+  --green: #2D7A4F;
+  --green-bg: #EAF5EF;
+  --green-border: #A8D9BC;
+  --blue: #1A5FA8;
+  --blue-bg: #EAF2FC;
+  --blue-border: #A8CAF0;
+  --step-active: #D4521A;
+  --step-done: #2D7A4F;
+  --step-inactive: #C8C4BB;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 40px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.header-left .eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink3);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 6px;
+}
+
+.header-left h1 {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.header-left h1 span { color: var(--accent); }
+
+.header-right {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.pill {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--ink2);
+  background: var(--bg);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── PROGRESS BAR ── */
+.progress-strip {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px 14px 0;
+  font-size: 12px;
+  color: var(--ink3);
+  cursor: default;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.progress-step.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.progress-step.done {
+  color: var(--green);
+  border-bottom-color: var(--green);
+}
+
+.step-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--ink3);
+  font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.progress-step.active .step-num {
+  background: var(--accent);
+  color: #fff;
+}
+
+.progress-step.done .step-num {
+  background: var(--green);
+  color: #fff;
+  font-size: 12px;
+}
+
+.step-arrow {
+  color: var(--border2);
+  font-size: 14px;
+  padding-right: 8px;
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 36px 24px 80px;
+}
+
+/* ── PHASE PANELS ── */
+.phase {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.phase.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink3);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 8px;
+}
+
+.section-heading {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+
+.section-desc {
+  color: var(--ink2);
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 28px;
+  max-width: 600px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 16px;
+}
+
+/* ── FORM ── */
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'DM Mono', monospace;
+}
+
+input[type="text"], textarea, select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: 'Noto Sans TC', sans-serif;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  background: #fff;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23928D87' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+/* ── TOPIC CHIPS ── */
+.topic-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.chip {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--ink2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+/* ── BUTTONS ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Noto Sans TC', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.2px;
+}
+
+.btn-primary:hover { background: #B8441A; transform: translateY(-1px); }
+.btn-primary:active { transform: none; }
+.btn-primary:disabled {
+  background: var(--border);
+  color: var(--ink3);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  color: var(--ink2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-family: 'Noto Sans TC', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-secondary:hover { border-color: var(--ink2); color: var(--ink); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  color: var(--accent);
+  border: none;
+  padding: 6px 0;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── LOADER ── */
+.loader {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+  color: var(--ink2);
+  font-size: 14px;
+}
+
+.loader.show { display: flex; }
+
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── OUTLINE RESULT ── */
+.outline-container {
+  display: none;
+  margin-top: 20px;
+}
+
+.outline-container.show { display: block; }
+
+.outline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.outline-header-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.outline-header-sub {
+  font-size: 12px;
+  color: var(--ink3);
+  margin-top: 2px;
+  font-family: 'DM Mono', monospace;
+}
+
+.slide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+
+.slide-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  transition: border-color 0.15s;
+}
+
+.slide-item:hover { border-color: var(--accent-border); }
+
+.slide-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.slide-content .slide-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.slide-content .slide-desc {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.6;
+}
+
+/* ── INFO BOX ── */
+.info-box {
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #174580;
+  line-height: 1.7;
+}
+
+.info-box strong { color: #0D3569; }
+
+.success-box {
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #1A5038;
+  line-height: 1.7;
+}
+
+.warn-box {
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #7A2E0C;
+  line-height: 1.7;
+}
+
+/* ── STEP GUIDE ── */
+.guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.guide-step {
+  display: flex;
+  gap: 20px;
+  position: relative;
+  padding-bottom: 28px;
+}
+
+.guide-step:last-child { padding-bottom: 0; }
+
+.guide-step::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 36px;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.guide-step:last-child::before { display: none; }
+
+.guide-dot {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink3);
+  z-index: 1;
+  position: relative;
+}
+
+.guide-step.completed .guide-dot {
+  background: var(--green-bg);
+  border-color: var(--green);
+  color: var(--green);
+  font-size: 14px;
+}
+
+.guide-step.current .guide-dot {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.guide-body {
+  flex: 1;
+  padding-top: 4px;
+}
+
+.guide-body .guide-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.guide-body .guide-desc {
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+/* ── CODE / COPY BLOCK ── */
+.copy-block {
+  background: #1E1C19;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.copy-block pre {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: #E8D9C0;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  flex: 1;
+}
+
+.copy-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: #B0A898;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.copy-btn:hover { background: rgba(255,255,255,0.14); color: #E8D9C0; }
+.copy-btn.copied { color: #7ECF98; border-color: #7ECF98; }
+
+/* ── GAMMA SCREENSHOT PLACEHOLDER ── */
+.gamma-visual {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.gamma-titlebar {
+  background: #F5F5F5;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot-r { width:10px;height:10px;border-radius:50%;background:#FF5F57;flex-shrink:0; }
+.dot-y { width:10px;height:10px;border-radius:50%;background:#FEBC2E;flex-shrink:0; }
+.dot-g { width:10px;height:10px;border-radius:50%;background:#28C840;flex-shrink:0; }
+
+.gamma-url {
+  background: #fff;
+  border: 1px solid #DDD;
+  border-radius: 4px;
+  padding: 2px 12px;
+  font-size: 11px;
+  color: #666;
+  font-family: 'DM Mono', monospace;
+  margin-left: 8px;
+}
+
+.gamma-body {
+  padding: 20px 24px;
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.6;
+}
+
+/* ── NAV BUTTONS ── */
+.nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── REFLECTION ── */
+.reflect-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+}
+
+.reflect-q {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.reflect-q-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.reflect-q-text {
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.7;
+}
+
+textarea.reflect-input {
+  margin-top: 8px;
+  min-height: 72px;
+  font-size: 13px;
+}
+
+/* ── FINAL CHECK ── */
+.checklist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.check-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: var(--ink2);
+  cursor: pointer;
+  user-select: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  transition: all 0.15s;
+}
+
+.check-item:hover { border-color: var(--accent-border); }
+.check-item.checked { background: var(--green-bg); border-color: var(--green-border); color: #1A5038; }
+
+.check-box {
+  width: 20px; height: 20px;
+  min-width: 20px;
+  border: 2px solid var(--border2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  margin-top: 1px;
+  transition: all 0.15s;
+}
+
+.check-item.checked .check-box {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+/* ── HIGHLIGHT BLOCK ── */
+.highlight-block {
+  background: var(--accent-bg);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 14px 0;
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.7;
+}
+
+.highlight-block strong { color: var(--ink); }
+
+/* ── PROMPT PREVIEW ── */
+#prompt-preview {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: #E8D9C0;
+  line-height: 1.7;
+}
+
+/* ── API KEY BANNER ── */
+.apikey-banner {
+  background: var(--blue-bg);
+  border-bottom: 1px solid var(--blue-border);
+  padding: 12px 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.apikey-banner label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #174580;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 0;
+  white-space: nowrap;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.apikey-banner input {
+  flex: 1;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid var(--blue-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+  color: var(--ink);
+  outline: none;
+}
+
+.apikey-banner input:focus { border-color: var(--blue); }
+
+.apikey-status {
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.apikey-status.ok { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.apikey-status.empty { background: var(--accent-bg); color: #7A2E0C; border: 1px solid var(--accent-border); }
+
+.apikey-hint {
+  font-size: 12px;
+  color: #174580;
+  width: 100%;
+}
+
+.apikey-hint a { color: var(--blue); }
+
+/* ── responsive ── */
+@media (max-width: 640px) {
+  .header { padding: 20px 16px; }
+  .progress-strip { padding: 0 16px; }
+  .main { padding: 24px 16px 60px; }
+  .form-row { grid-template-columns: 1fr; }
+  .copy-block { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="eyebrow">高中生 AI 工具教案 · 互動版</div>
+    <h1>用 AI 生成 <span>Gamma 大綱</span><br>再做出你的第一份簡報</h1>
+  </div>
+  <div class="header-right">
+    <span class="pill">🆓 免費</span>
+    <span class="pill">⏱ 約 30 分鐘</span>
+    <span class="pill">初學者適用</span>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-strip" id="progress-strip">
+  <div class="progress-step active" id="ps-1">
+    <div class="step-num" id="sn-1">1</div>認識流程
+  </div>
+  <div class="step-arrow">›</div>
+  <div class="progress-step" id="ps-2">
+    <div class="step-num" id="sn-2">2</div>設定主題
+  </div>
+  <div class="step-arrow">›</div>
+  <div class="progress-step" id="ps-3">
+    <div class="step-num" id="sn-3">3</div>AI 生成大綱
+  </div>
+  <div class="step-arrow">›</div>
+  <div class="progress-step" id="ps-4">
+    <div class="step-num" id="sn-4">4</div>匯入 Gamma
+  </div>
+  <div class="step-arrow">›</div>
+  <div class="progress-step" id="ps-5">
+    <div class="step-num" id="sn-5">5</div>反思與完成
+  </div>
+</div>
+
+<!-- API KEY BANNER -->
+<div class="apikey-banner">
+  <label>🔑 OpenRouter API Key：</label>
+  <input type="password" id="gemini-api-key" placeholder="貼上你的 API Key（sk-or-v1-...）" oninput="updateKeyStatus()">
+  <span class="apikey-status empty" id="key-status">尚未輸入</span>
+  <div class="apikey-hint">
+    還沒有 Key？前往 <a href="https://openrouter.ai/settings/keys" target="_blank">openrouter.ai → Keys → Create Key</a> 免費註冊取得，不需要信用卡。
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ══════════════════════════════════════
+       PHASE 1 — 認識流程
+  ══════════════════════════════════════ -->
+  <div class="phase active" id="phase-1">
+    <div class="section-label">階段 1 / 5</div>
+    <div class="section-heading">在開始之前，先了解今天的流程</div>
+    <div class="section-desc">今天你會學到一個強大的組合技：先用 AI 幫你規劃簡報大綱，再把大綱帶到 Gamma 自動生成完整簡報。這是很多大學生和職場人士現在都在用的方法。</div>
+
+    <div class="card">
+      <div class="guide-steps">
+        <div class="guide-step current">
+          <div class="guide-dot">1</div>
+          <div class="guide-body">
+            <div class="guide-title">你輸入：主題 + 對象 + 頁數</div>
+            <div class="guide-desc">告訴 AI 你想做什麼主題的簡報、是給誰看的、要幾頁。這就是「Prompt 提示詞」，你說得愈清楚，AI 幫你做的就愈好。</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-dot">2</div>
+          <div class="guide-body">
+            <div class="guide-title">AI 生成：完整的 Gamma 大綱</div>
+            <div class="guide-desc">AI 會依照你的主題，幫你想好每一頁的標題和重點，輸出一份可以直接貼進 Gamma 的大綱格式。</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-dot">3</div>
+          <div class="guide-body">
+            <div class="guide-title">你操作：把大綱貼進 Gamma</div>
+            <div class="guide-desc">打開 Gamma，新增簡報，把 AI 生成的大綱貼進去。Gamma 會根據大綱自動排版、配色、生成完整簡報。</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-dot">4</div>
+          <div class="guide-body">
+            <div class="guide-title">你調整：讓簡報真的屬於你</div>
+            <div class="guide-desc">AI 生成的只是起點，你還需要修改內容、換主題風格，讓簡報反映你自己的理解和個性。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>為什麼要先用 AI 生大綱，再去 Gamma？</strong><br>
+      直接在 Gamma 輸入一行主題，AI 會幫你猜要講什麼。但如果你先用 AI 規劃大綱，再貼進 Gamma，你可以更精確地控制每一頁的內容方向，做出的簡報更貼近你真正想說的事。
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <button class="btn-primary" onclick="goTo(2)">我了解了，開始吧 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PHASE 2 — 設定主題
+  ══════════════════════════════════════ -->
+  <div class="phase" id="phase-2">
+    <div class="section-label">階段 2 / 5</div>
+    <div class="section-heading">設定你的簡報主題</div>
+    <div class="section-desc">先決定你要做什麼主題。你輸入的資訊愈具體，AI 幫你生成的大綱就愈精準。</div>
+
+    <div class="card">
+      <div class="form-group">
+        <label>簡報主題</label>
+        <input type="text" id="input-topic" placeholder="例如：台灣珊瑚礁白化的原因與保育行動" maxlength="100">
+        <div class="topic-chips" id="topic-chips">
+          <span class="chip" onclick="setTopic('氣候變遷對台灣農業的影響')">氣候變遷 × 台灣農業</span>
+          <span class="chip" onclick="setTopic('社群媒體對青少年心理健康的影響')">社群媒體 × 心理健康</span>
+          <span class="chip" onclick="setTopic('人工智慧在教育上的應用與挑戰')">AI × 教育</span>
+          <span class="chip" onclick="setTopic('台灣原住民文化的保存與傳承')">原住民文化保存</span>
+          <span class="chip" onclick="setTopic('電動車普及化的機會與困難')">電動車普及化</span>
+          <span class="chip" onclick="setTopic('台灣的食物浪費問題與解決方案')">食物浪費問題</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label>目標對象</label>
+          <select id="input-audience">
+            <option value="高中生">高中生同學</option>
+            <option value="老師">老師與評審</option>
+            <option value="一般大眾">一般大眾</option>
+            <option value="家長">家長</option>
+            <option value="社區居民">社區居民</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>簡報頁數（卡片數）</label>
+          <select id="input-cards">
+            <option value="6">6 頁（精簡版）</option>
+            <option value="8" selected>8 頁（標準）</option>
+            <option value="10">10 頁（完整版）</option>
+            <option value="12">12 頁（詳細版）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:13px; font-weight:700; margin-bottom:10px; color: var(--ink);">進階設定（可選填）</div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>特別要求或重點方向</label>
+        <input type="text" id="input-extra" placeholder="例如：要有數據、要有解決方案、要強調台灣本土案例">
+      </div>
+    </div>
+
+    <div class="highlight-block">
+      <strong>提示：</strong>主題不用完美，先輸入你目前的想法。等下看到 AI 生成的大綱後，你還可以修改方向重新生成。
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-secondary" onclick="goTo(1)">← 上一步</button>
+      <button class="btn-primary" onclick="validateAndGoTo3()">生成 AI 大綱 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PHASE 3 — AI 生成大綱
+  ══════════════════════════════════════ -->
+  <div class="phase" id="phase-3">
+    <div class="section-label">階段 3 / 5</div>
+    <div class="section-heading">AI 正在幫你規劃大綱</div>
+    <div class="section-desc">下面是系統傳給 AI 的完整提示詞，以及 AI 回應的大綱結果。</div>
+
+    <div class="card">
+      <div style="font-size:13px; font-weight:700; margin-bottom:10px; color:var(--ink);">傳給 AI 的提示詞（Prompt）</div>
+      <div class="copy-block">
+        <pre id="prompt-preview">載入中…</pre>
+        <button class="copy-btn" id="copy-prompt-btn" onclick="copyText('prompt-preview', 'copy-prompt-btn')">複製</button>
+      </div>
+      <div style="font-size:12px; color:var(--ink3); margin-top:8px; font-family:'DM Mono',monospace;">
+        ↑ 這就是讓 AI 理解你需求的關鍵。寫得愈具體，結果愈精準。
+      </div>
+    </div>
+
+    <div class="loader show" id="outline-loader">
+      <div class="spinner"></div>
+      <span id="loader-text">AI 正在分析主題，規劃大綱架構…</span>
+    </div>
+
+    <div class="outline-container" id="outline-container">
+      <div class="outline-header">
+        <div>
+          <div class="outline-header-title" id="outline-title-display">大綱結果</div>
+          <div class="outline-header-sub" id="outline-meta">—</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-secondary" style="font-size:12px;padding:8px 14px;" onclick="regenerateOutline()">↻ 重新生成</button>
+          <button class="btn-secondary" style="font-size:12px;padding:8px 14px;" onclick="copyFullOutline()">複製大綱文字</button>
+        </div>
+      </div>
+
+      <ul class="slide-list" id="slide-list"></ul>
+
+      <div style="margin-top:20px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:8px; color:var(--ink);">Gamma「貼入文字」格式（等下要用這個）</div>
+        <div class="copy-block">
+          <pre id="gamma-paste-text" style="font-size:12px;">生成中…</pre>
+          <button class="copy-btn" id="copy-gamma-btn" onclick="copyText('gamma-paste-text', 'copy-gamma-btn')">複製</button>
+        </div>
+        <div style="font-size:12px; color:var(--ink3); margin-top:6px; font-family:'DM Mono',monospace;">↑ 這段文字等下要貼進 Gamma 的「Paste in text」輸入框</div>
+      </div>
+
+      <div class="success-box" style="margin-top:20px;">
+        <strong>大綱看起來合理嗎？</strong> 確認每一頁的主題都符合你的想法，再進下一步。如果有頁想改，可以點「重新生成」並修改主題或需求。
+      </div>
+    </div>
+
+    <div id="phase3-nav" class="nav-row" style="display:none;">
+      <button class="btn-secondary" onclick="goTo(2)">← 修改主題</button>
+      <button class="btn-primary" onclick="goTo(4)">帶大綱去 Gamma →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PHASE 4 — 匯入 Gamma
+  ══════════════════════════════════════ -->
+  <div class="phase" id="phase-4">
+    <div class="section-label">階段 4 / 5</div>
+    <div class="section-heading">把大綱帶進 Gamma，生成完整簡報</div>
+    <div class="section-desc">現在你有了 AI 規劃好的大綱，接下來的每一步都要在 Gamma 裡操作。跟著下面的步驟走。</div>
+
+    <div class="card">
+      <div class="guide-steps">
+
+        <div class="guide-step current" id="gs-4-1">
+          <div class="guide-dot" id="gd-4-1">1</div>
+          <div class="guide-body">
+            <div class="guide-title">打開 Gamma，新增內容</div>
+            <div class="guide-desc">前往 <strong>gamma.app</strong>，登入後點左側的「<strong>Create New（新增）</strong>」按鈕。</div>
+            <div class="gamma-visual">
+              <div class="gamma-titlebar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="gamma-url">gamma.app</span></div>
+              <div class="gamma-body">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                  <div style="width:120px;height:28px;background:#FF6B35;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;">+ Create New</div>
+                  <span style="font-size:12px;color:var(--ink3);">← 點這個</span>
+                </div>
+                <div style="font-size:12px;color:var(--ink3);">（在左側導覽列可以看到）</div>
+              </div>
+            </div>
+            <button class="btn-ghost" onclick="window.open('https://gamma.app','_blank')">開啟 Gamma ↗</button>
+          </div>
+        </div>
+
+        <div class="guide-step" id="gs-4-2">
+          <div class="guide-dot" id="gd-4-2">2</div>
+          <div class="guide-body">
+            <div class="guide-title">選擇「Paste in text（貼入文字）」</div>
+            <div class="guide-desc">彈出選單中，選擇第二個選項：<strong>「Paste in text」</strong>。這個方式讓你貼入自己準備好的大綱，比直接讓 AI 猜主題更精準。</div>
+            <div class="gamma-visual">
+              <div class="gamma-titlebar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="gamma-url">gamma.app — 新增內容</span></div>
+              <div class="gamma-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+                  <div style="border:1px solid #DDD;border-radius:6px;padding:10px;opacity:0.5;">
+                    <div style="font-weight:700;margin-bottom:2px;">Generate</div>
+                    <div style="color:var(--ink3);">用一行說明生成</div>
+                  </div>
+                  <div style="border:2px solid #FF6B35;border-radius:6px;padding:10px;background:#FFF5F0;">
+                    <div style="font-weight:700;margin-bottom:2px;color:#D4521A;">Paste in text ←</div>
+                    <div style="color:#7A2E0C;">貼入你的大綱文字</div>
+                  </div>
+                  <div style="border:1px solid #DDD;border-radius:6px;padding:10px;opacity:0.5;">
+                    <div style="font-weight:700;margin-bottom:2px;">Import file</div>
+                    <div style="color:var(--ink3);">上傳檔案</div>
+                  </div>
+                  <div style="border:1px solid #DDD;border-radius:6px;padding:10px;opacity:0.5;">
+                    <div style="font-weight:700;margin-bottom:2px;">Template</div>
+                    <div style="color:var(--ink3);">使用模板</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step" id="gs-4-3">
+          <div class="guide-dot" id="gd-4-3">3</div>
+          <div class="guide-body">
+            <div class="guide-title">貼入 AI 生成的大綱文字</div>
+            <div class="guide-desc">把剛才生成的大綱文字，複製後貼入 Gamma 的文字輸入框中。</div>
+            <div class="copy-block">
+              <pre id="phase4-outline-preview" style="font-size:12px;">（在上一步已生成）</pre>
+              <button class="copy-btn" id="copy-p4-btn" onclick="copyText('phase4-outline-preview','copy-p4-btn')">複製大綱</button>
+            </div>
+            <div class="warn-box" style="margin-top:10px;">
+              <strong>貼入後，先不要急著按生成！</strong> 先確認文字內容正確，再往下調整設定。
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step" id="gs-4-4">
+          <div class="guide-dot" id="gd-4-4">4</div>
+          <div class="guide-body">
+            <div class="guide-title">設定簡報選項</div>
+            <div class="guide-desc">在 Gamma 裡確認以下設定，再按「Generate」：</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin:10px 0;">
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;">
+                <span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span>
+                <span><strong>類型</strong>：選「Presentation（簡報）」</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;">
+                <span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span>
+                <span><strong>文字量</strong>：選「Concise（精簡）」— 重點清楚，不塞太多字</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;">
+                <span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span>
+                <span><strong>主題風格</strong>：選一個你喜歡的配色主題</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;">
+                <span style="color:var(--green);font-weight:700;flex-shrink:0;">✓</span>
+                <span><strong>圖片來源</strong>：選「AI Images」讓 AI 自動配圖</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step" id="gs-4-5">
+          <div class="guide-dot" id="gd-4-5">5</div>
+          <div class="guide-body">
+            <div class="guide-title">按「Generate」，等 Gamma 生成</div>
+            <div class="guide-desc">按下生成後，Gamma 會根據你的大綱自動排版、配色、生成圖片。通常需要 30–60 秒，耐心等待。</div>
+            <div class="info-box" style="margin-top:8px;">
+              生成完成後，記得捲動瀏覽每一頁，確認內容大致正確，再進行微調。
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step" id="gs-4-6">
+          <div class="guide-dot" id="gd-4-6">6</div>
+          <div class="guide-body">
+            <div class="guide-title">完成後，嘗試這三件事</div>
+            <div class="guide-desc">簡報生成後，做以下調整，讓它真正屬於你：</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+              <div style="font-size:14px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
+                <strong>① 修改一個你覺得不準確的段落</strong><br>
+                <span style="font-size:13px;color:var(--ink3);">直接點擊文字就可以修改，和打 Word 一樣</span>
+              </div>
+              <div style="font-size:14px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
+                <strong>② 換一個不同的主題風格（Theme）</strong><br>
+                <span style="font-size:13px;color:var(--ink3);">右側面板點 Theme，試試不同配色</span>
+              </div>
+              <div style="font-size:14px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
+                <strong>③ 產生一個分享連結</strong><br>
+                <span style="font-size:13px;color:var(--ink3);">右上角 Share → Copy link，分享給同學看</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-secondary" onclick="goTo(3)">← 看大綱</button>
+      <button class="btn-primary" onclick="goTo(5)">我完成了 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PHASE 5 — 反思與完成
+  ══════════════════════════════════════ -->
+  <div class="phase" id="phase-5">
+    <div class="section-label">階段 5 / 5</div>
+    <div class="section-heading">反思 + 完成確認</div>
+    <div class="section-desc">做完簡報，花 5 分鐘想想這個過程。這些問題沒有標準答案，寫下你真正的感受和想法。</div>
+
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;color:var(--ink);">反思問題</div>
+      <ul class="reflect-questions">
+        <li class="reflect-q">
+          <span class="reflect-q-num">Q1</span>
+          <div style="flex:1;">
+            <div class="reflect-q-text">AI 幫你生成的大綱，和你原本自己想的方向有什麼不同？哪個部分你覺得 AI 的安排比你好？哪個部分你覺得不對，需要修改？</div>
+            <textarea class="reflect-input" placeholder="寫下你的想法…"></textarea>
+          </div>
+        </li>
+        <li class="reflect-q">
+          <span class="reflect-q-num">Q2</span>
+          <div style="flex:1;">
+            <div class="reflect-q-text">如果你之前都用 PowerPoint 做簡報，和這次用 Gamma 相比，你覺得哪些地方方便很多？哪些地方還是有點不習慣？</div>
+            <textarea class="reflect-input" placeholder="寫下你的想法…"></textarea>
+          </div>
+        </li>
+        <li class="reflect-q">
+          <span class="reflect-q-num">Q3</span>
+          <div style="flex:1;">
+            <div class="reflect-q-text">這次你用 AI 幫你做大綱，但如果是學校考試要你自己想大綱，你覺得 AI 有沒有幫助你更了解「一份好的簡報應該怎麼組織」？</div>
+            <textarea class="reflect-input" placeholder="寫下你的想法…"></textarea>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;color:var(--ink);">完成確認清單</div>
+      <ul class="checklist" id="final-checklist">
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          我完成了主題設定，讓 AI 生成了完整大綱
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          我把大綱貼進 Gamma，成功生成了完整簡報
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          我手動修改了至少一段內容，讓簡報更符合我的想法
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          我試過更換主題風格（Theme）
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          我產生了分享連結，分享給至少一個同學
+        </li>
+      </ul>
+    </div>
+
+    <div class="card" id="congrats-card" style="display:none; text-align:center; padding:32px 28px;">
+      <div style="font-size:40px;margin-bottom:12px;">🎉</div>
+      <div style="font-size:20px;font-weight:900;margin-bottom:8px;">恭喜完成今天的課程！</div>
+      <div style="font-size:14px;color:var(--ink2);margin-bottom:20px;line-height:1.8;">你剛剛體驗了 <strong>AI + Gamma</strong> 的完整工作流程。<br>這個技能，大學報告、社團提案、甚至未來找工作都用得上。</div>
+      <div style="background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:10px;padding:16px 20px;font-size:14px;color:#7A2E0C;text-align:left;line-height:1.7;">
+        <strong>升大學後可以繼續學的進階技巧：</strong><br>
+        ① 在 Gamma 建立個人作品集網站（不需要寫程式）<br>
+        ② 設定品牌顏色和字體，讓所有作品有統一風格<br>
+        ③ 用 Gamma 做求職用的自我介紹簡報<br>
+        ④ 學會用 Prompt 更精準地控制 AI 輸出結果
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-secondary" onclick="goTo(4)">← 回去 Gamma 操作</button>
+      <button class="btn-primary" id="finish-btn" onclick="checkFinish()">完成課程 ✓</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+let currentOutlineData = null;
+
+function updateKeyStatus() {
+  const key = document.getElementById('gemini-api-key').value.trim();
+  const status = document.getElementById('key-status');
+  if (key.startsWith('sk-or-') && key.length > 20) {
+    status.textContent = '✓ 已設定';
+    status.className = 'apikey-status ok';
+  } else if (key.length > 0) {
+    status.textContent = '格式不對？';
+    status.className = 'apikey-status empty';
+  } else {
+    status.textContent = '尚未輸入';
+    status.className = 'apikey-status empty';
+  }
+}
+
+function goTo(n) {
+  document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+  document.getElementById('phase-' + n).classList.add('active');
+
+  for (let i = 1; i <= 5; i++) {
+    const ps = document.getElementById('ps-' + i);
+    const sn = document.getElementById('sn-' + i);
+    ps.classList.remove('active', 'done');
+    if (i < n) { ps.classList.add('done'); sn.textContent = '✓'; }
+    else if (i === n) { ps.classList.add('active'); sn.textContent = i; }
+    else { sn.textContent = i; }
+  }
+
+  if (n === 3) runOutlineGeneration();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setTopic(t) {
+  document.getElementById('input-topic').value = t;
+}
+
+function validateAndGoTo3() {
+  const key = document.getElementById('gemini-api-key').value.trim();
+  if (!key || !key.startsWith('sk-or-')) {
+    const banner = document.querySelector('.apikey-banner');
+    banner.style.outline = '2px solid #D4521A';
+    document.getElementById('gemini-api-key').focus();
+    setTimeout(() => { banner.style.outline = ''; }, 2000);
+    return;
+  }
+  const t = document.getElementById('input-topic').value.trim();
+  if (!t) {
+    document.getElementById('input-topic').focus();
+    document.getElementById('input-topic').style.borderColor = '#D4521A';
+    setTimeout(() => document.getElementById('input-topic').style.borderColor = '', 1500);
+    return;
+  }
+  goTo(3);
+}
+
+function buildPrompt() {
+  const topic = document.getElementById('input-topic').value.trim();
+  const audience = document.getElementById('input-audience').value;
+  const cards = document.getElementById('input-cards').value;
+  const extra = document.getElementById('input-extra').value.trim();
+
+  return `你是一位專業的簡報設計顧問，專門幫高中生和大學生規劃清晰有力的簡報大綱。
+
+請幫我設計一份 Gamma 簡報的完整大綱，以下是需求：
+
+【主題】${topic}
+【目標對象】${audience}
+【頁數（卡片數）】${cards} 頁
+${extra ? `【特別要求】${extra}` : ''}
+
+請輸出嚴格的 JSON 格式，不要加任何 markdown、說明文字或程式碼圍欄，直接輸出 JSON：
+
+{
+  "title": "簡報標題",
+  "slides": [
+    {
+      "num": 1,
+      "title": "這頁的標題",
+      "desc": "這頁要說的重點（1-2句話）",
+      "keywords": ["關鍵詞1", "關鍵詞2"]
+    }
+  ]
+}
+
+規則：
+- 第一頁必須是封面/標題頁，最後一頁是結語/總結
+- 每頁標題要精確、有意義，不要太長
+- desc 要說明這頁的具體內容方向，讓學生知道要找什麼資料
+- 整體架構要有邏輯性，從問題→原因→影響→解決方案 or 類似的清晰順序
+- 請輸出繁體中文`;
+}
+
+async function runOutlineGeneration() {
+  const topic = document.getElementById('input-topic').value.trim();
+  const cards = document.getElementById('input-cards').value;
+
+  const promptText = buildPrompt();
+  document.getElementById('prompt-preview').textContent = promptText;
+
+  document.getElementById('outline-loader').classList.add('show');
+  document.getElementById('outline-container').classList.remove('show');
+  document.getElementById('phase3-nav').style.display = 'none';
+
+  let loaderMsgs = [
+    'AI 正在分析主題，規劃大綱架構…',
+    '思考每一頁的邏輯順序…',
+    '為各頁面設計標題和重點…',
+    '最後檢查大綱的完整性…'
+  ];
+  let lIdx = 0;
+  const lt = setInterval(() => {
+    lIdx = (lIdx + 1) % loaderMsgs.length;
+    document.getElementById('loader-text').textContent = loaderMsgs[lIdx];
+  }, 2000);
+
+  try {
+    const apiKey = document.getElementById('gemini-api-key').value.trim();
+    const res = await fetch(OPENROUTER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'qwen/qwen3-235b-a22b:free',
+        messages: [{ role: 'user', content: promptText }],
+        max_tokens: 1000
+      })
+    });
+
+    clearInterval(lt);
+    const data = await res.json();
+
+    if (!res.ok) {
+      const msg = data?.error?.message || '未知錯誤';
+      throw new Error(msg);
+    }
+
+    const raw = data.choices?.[0]?.message?.content || '';
+
+    let parsed;
+    try {
+      const clean = raw.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(clean);
+    } catch {
+      throw new Error('JSON 解析失敗');
+    }
+
+    currentOutlineData = parsed;
+    renderOutline(parsed, topic, cards);
+
+  } catch (err) {
+    clearInterval(lt);
+    document.getElementById('outline-loader').classList.remove('show');
+    document.getElementById('outline-container').classList.add('show');
+    document.getElementById('slide-list').innerHTML = `<li style="padding:16px;color:#7A2E0C;font-size:14px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:8px;">⚠️ 生成失敗：${err.message}<br><br>請確認 API Key 是否正確，或重新整理頁面再試。</li>`;
+    document.getElementById('phase3-nav').style.display = 'flex';
+  }
+}
+
+function renderOutline(parsed, topic, cards) {
+  document.getElementById('outline-loader').classList.remove('show');
+  document.getElementById('outline-container').classList.add('show');
+  document.getElementById('phase3-nav').style.display = 'flex';
+
+  document.getElementById('outline-title-display').textContent = parsed.title || topic;
+  document.getElementById('outline-meta').textContent = `${parsed.slides?.length || cards} 頁 · 目標對象：${document.getElementById('input-audience').value}`;
+
+  const list = document.getElementById('slide-list');
+  list.innerHTML = '';
+  (parsed.slides || []).forEach(s => {
+    const li = document.createElement('li');
+    li.className = 'slide-item';
+    li.innerHTML = `<div class="slide-num">P${s.num}</div>
+      <div class="slide-content">
+        <div class="slide-title">${s.title}</div>
+        <div class="slide-desc">${s.desc}</div>
+        ${s.keywords ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${s.keywords.map(k=>`<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);font-family:'DM Mono',monospace;">${k}</span>`).join('')}</div>` : ''}
+      </div>`;
+    list.appendChild(li);
+  });
+
+  const gammaText = buildGammaPasteText(parsed);
+  document.getElementById('gamma-paste-text').textContent = gammaText;
+  document.getElementById('phase4-outline-preview').textContent = gammaText;
+}
+
+function buildGammaPasteText(parsed) {
+  if (!parsed?.slides) return '';
+  let out = `# ${parsed.title}\n\n`;
+  parsed.slides.forEach(s => {
+    out += `## ${s.title}\n${s.desc}\n\n`;
+  });
+  return out.trim();
+}
+
+function regenerateOutline() {
+  runOutlineGeneration();
+}
+
+function copyText(elId, btnId) {
+  const el = document.getElementById(elId);
+  const text = el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(btnId);
+    const orig = btn.textContent;
+    btn.textContent = '已複製 ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyFullOutline() {
+  if (!currentOutlineData) return;
+  const text = buildGammaPasteText(currentOutlineData);
+  navigator.clipboard.writeText(text).then(() => {
+    alert('大綱已複製到剪貼簿！');
+  });
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const all = document.querySelectorAll('#final-checklist .check-item');
+  const done = document.querySelectorAll('#final-checklist .check-item.checked');
+  if (done.length === all.length) {
+    document.getElementById('congrats-card').style.display = 'block';
+  }
+}
+
+function checkFinish() {
+  const all = document.querySelectorAll('#final-checklist .check-item');
+  const done = document.querySelectorAll('#final-checklist .check-item.checked');
+  if (done.length < all.length) {
+    document.getElementById('congrats-card').style.display = 'none';
+    document.querySelectorAll('#final-checklist .check-item:not(.checked)').forEach(el => {
+      el.style.outline = '2px solid #D4521A';
+      setTimeout(() => el.style.outline = '', 1500);
+    });
+    return;
+  }
+  document.getElementById('congrats-card').style.display = 'block';
+  document.getElementById('congrats-card').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
