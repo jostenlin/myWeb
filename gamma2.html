@@ -1356,7 +1356,9 @@ ${extra ? `【特別要求】${extra}` : ''}
 - 每頁標題要精確、有意義，不要太長
 - desc 要說明這頁的具體內容方向，讓學生知道要找什麼資料
 - 整體架構要有邏輯性，從問題→原因→影響→解決方案 or 類似的清晰順序
-- 請輸出繁體中文`;
+- 請輸出繁體中文
+- 所有字串值不可包含換行、雙引號或反斜線
+- 只輸出純 JSON，不要加任何說明文字`;
 }
 
 async function runOutlineGeneration() {
@@ -1410,13 +1412,17 @@ async function runOutlineGeneration() {
     let parsed;
     try {
       const clean = raw.replace(/```json|```/g, '').trim();
-      // 找出第一個 { 到最後一個 } 之間的內容
       const start = clean.indexOf('{');
       const end = clean.lastIndexOf('}');
-      if (start === -1 || end === -1) throw new Error('回傳內容：' + clean.slice(0, 200));
-      parsed = JSON.parse(clean.slice(start, end + 1));
+      if (start === -1 || end === -1) throw new Error('找不到 JSON 結構，回傳：' + clean.slice(0, 200));
+      // 取出 JSON 字串，移除控制字元
+      const jsonStr = clean.slice(start, end + 1)
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '') // 移除非法控制字元（保留 \n \r \t）
+        .replace(/,\s*}/g, '}')   // 修復尾部多餘逗號
+        .replace(/,\s*]/g, ']');  // 修復陣列尾部多餘逗號
+      parsed = JSON.parse(jsonStr);
     } catch(e) {
-      throw new Error(e.message || 'JSON 解析失敗，原始回傳：' + raw.slice(0, 300));
+      throw new Error(e.message);
     }
 
     currentOutlineData = parsed;
