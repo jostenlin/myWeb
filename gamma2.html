@@ -1413,10 +1413,10 @@ async function runOutlineGeneration() {
       // 找出第一個 { 到最後一個 } 之間的內容
       const start = clean.indexOf('{');
       const end = clean.lastIndexOf('}');
-      if (start === -1 || end === -1) throw new Error('no JSON');
+      if (start === -1 || end === -1) throw new Error('回傳內容：' + clean.slice(0, 200));
       parsed = JSON.parse(clean.slice(start, end + 1));
-    } catch {
-      throw new Error('JSON 解析失敗');
+    } catch(e) {
+      throw new Error(e.message || 'JSON 解析失敗，原始回傳：' + raw.slice(0, 300));
     }
 
     currentOutlineData = parsed;
